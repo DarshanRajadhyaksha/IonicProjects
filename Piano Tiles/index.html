@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no, width=device-width">
+    <title></title>
+    <link rel="manifest" href="manifest.json">
+    <link href="lib/ionic/css/ionic.css" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
+    <script src="lib/ionic/js/ionic.bundle.js"></script>
+    <script src="cordova.js"></script>
+    <script src="js/app.js"></script>
+
+  </head>
+  <body ng-app="starter">
+<style>
+body {
+  margin:0px;
+}
+
+.set {
+  width:100%;
+  position:fixed;
+}
+.set.hide {
+  display:none;
+}
+.set div{
+  content:' ';
+  width:25%;
+  float:left;
+  height:100%;
+  /*padding-bottom: 130px;*/
+  background:#f7f7f7;
+  border:0.08em groove rgb(80,80,80);
+  border-right:none;
+  border-top:none;
+}
+.set div.black {
+  background:black;
+}
+.set div.red {
+  animation: over 0.4s linear 6;
+  transition: all 0.5s ease;
+}
+#game {
+  transform:rotate(180%);
+}
+.prev .black {
+  background:rgb(200,200,200);
+}
+
+#timer {
+  position: fixed;
+  top: 0px;
+  width: 1px;
+  height: 6px;
+  background: #00acee;
+  z-index: 100;
+  border-radius:2px;
+  transition:all 0.3s linear;
+}
+#score {
+  position: fixed;
+  top: 22px;
+  width: 100%;
+  text-align: center;
+  color:tomato;
+  font-size: 32px;
+
+  font-weight: 600;
+  z-index: 100;
+  transition:all 0.2s linear;
+}
+
+@keyframes over {
+  from {
+    background: #f7f7f7;
+  }
+  to {
+    background: tomato;
+  }
+}
+</style>
+<script src="js/jquery.js"></script>
+    <ion-pane>
+      <div class="content">
+<div id="game">
+  <div id="timer"></div>
+  <div id="score"></div>
+</div>
+<script type="text/javascript">
+var game = document.getElementById('game');
+var set = [];
+var prev = 0;
+var score = 0;
+var times = 0;
+var width = 1;
+var time = 0;
+var gameisover = false;
+var timer = setInterval(function(){
+  var per = Math.round((width/60)*100);
+  time++;
+document.getElementById('timer').style.width = per+'%';
+width++;
+},1000);
+
+var timerout = setTimeout(function(){
+gameOver();
+},60000);
+function genSet(){
+  var htmCode = '';
+  var blackID = Math.trunc(Math.random()*3);
+  if(prev == blackID){
+    blackID = Math.round(Math.random()*blackID);
+  }
+  prev = blackID;
+  
+  for(var i=0;i<4;i++){
+    if(i==blackID){
+      htmCode += '<div class="tile black"></div>'; 
+    } else {
+      htmCode += '<div class="tile"></div>'; 
+    }
+  }
+  return htmCode;
+}
+
+$(window).load(function(){
+  var height = (window.innerHeight)/4;
+  bottom = 0;
+  for(var i=0;i<5;i++)
+    if(i==0){      
+     $('#game').html($('#game').html()+'<div class="set current" style="bottom:'+ bottom +'px;height:'+height+'px;">' + genSet() + '</div>'); 
+      bottom += height;
+    } else if(i==4){
+     $('#game').html($('#game').html()+'<div class="set last" style="bottom:'+ bottom +'px;height:'+height+'px;">' + genSet() + '</div>');          
+         }
+  else {
+    $('#game').html($('#game').html()+'<div class="set" style="bottom:'+ bottom +'px;height:'+height+'px;">' + genSet() + '</div>'); 
+    bottom += height;
+  }
+  $('.current div').click(function clicked(){
+    //alert('a');
+     if($(this).hasClass('black')){
+      if(gameisover === false){
+       $(this).css("background","rgb(170,170,170)");
+       $('.last').html(genSet());
+       var pos = $('.current');
+       var currHtm = pos.html();
+       if(times > 0){
+         pos.prev().html(currHtm);
+         var next1 = pos.next().html();
+         var next2 = pos.next().next().html();
+         var next3 = pos.next().next().next().html();
+         pos.html(next1);
+         pos.next().html(next2);
+         pos.next().next().html(next3);
+       }
+       times++;
+       if(times == 1){
+       pos.removeClass('current').next().addClass('current');
+       }
+       $('.current div').each(function(){
+         this.onclick = clicked;
+       });
+       score++;
+       $('#score').text(score);
+        }
+     } else {
+      gameisover = true;
+      $(this).addClass('red');      
+clearInterval(timer);
+      setTimeout(gameOver,1500);
+     }
+  });  
+});
+
+function newSet(htmCode){
+   return '<div class="set">' + htmCode + '</div>';
+  
+}
+function gameOver(){
+      clearInterval(timer);
+      clearTimeout(timerout);
+      var num = score/time;
+        if(isNaN(num)){num=0;}
+    $('body').css('background','tomato').css('color','white');
+       $('#game').html('<center><br><br><br><br><h1>Game Over</h1><h3>Score : '+num.toFixed(4)+' tiles/sec </h3><a class="button button-block" onclick="window.location.assign(\'index.html\');">Play Again</a></center>');
+       $('pane').css('background','tomato');
+       $('pane').css('color','white');
+
+}
+</script>
+      </div>
+    </ion-pane>
+  </body>
+</html>
